@@ -1,0 +1,66 @@
+Function RndName() As String
+    Dim sylaby As Variant
+    Dim ilSylab As Long
+    Dim i As Long
+    Dim imie As String
+    
+    sylaby = Array("la", "ma", "ri", "ka", "ta", "no", "li", "sa", "ra", "be")
+    
+    ilSylab = Int(2 + Rnd * 2) ' imie z 2-3 sylab
+    imie = ""
+    For i = 1 To ilSylab
+        imie = imie & sylaby(Int(Rnd * UBound(sylaby) + 0.5))
+    Next i
+    
+    'Pierwsza litera wielka
+    imie = UCase(Left(imie, 1)) & Mid(imie, 2)
+    
+    RndName = imie
+        
+End Function
+Sub WriteRndName()
+    Dim ws As Worksheet
+    Dim r As Long
+    Set ws = ActiveSheet
+    
+    For r = 2 To 1001
+    ws.Cells(r, 1).Value = RndName
+    Next r
+End Sub
+Function RndName2() As String
+    Dim sylaby As Variant
+    Dim ilSylab As Long
+    Dim i As Long
+    Dim imie As String
+    
+sylaby = Array("la", "ma", "ri", "ka", "ta", "no", "li", "sa", "ra", "be")
+
+    ilSylab = Int(2 + Rnd * 2) ' imie z 2-3 sylab
+    imie = ""
+    For i = 1 To ilSylab
+        imie = imie & sylaby(Int(Rnd * UBound(sylaby) + 0.5))
+        
+    Next i
+    
+    'Pierwsza litera wielka
+    imie = UCase(Left(imie, 1)) & Mid(imie, 2)
+    
+    RndName2 = imie
+        
+End Function
+Function RndLicz()
+    Randomize
+    RndLicz = Int((999 - 100 + 1) * Rnd + 100) ' losowa liczba od 100 do 999
+End Function
+Sub WriteRndName2()
+    Dim ws As Worksheet
+    Dim r As Long
+    Set ws = ActiveSheet
+    
+    
+        For r = 2 To 1001
+        ws.Cells(r, 1).Value = RndName2()
+        ws.Cells(r, 2).Value = RndLicz()
+        Next r
+End Sub
+
