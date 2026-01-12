@@ -1,0 +1,89 @@
+Sub TabelaPodNaglowkiem_IloscWNaglowkach()
+    Dim ws As Worksheet, wsOut As Worksheet
+    Dim lastRow As Long, i As Long, outRow As Long
+    Dim nazwa As String, naglowek As String
+    Dim sumaDict As Object, countDict As Object, naglowkiDict As Object
+    
+    Set ws = ActiveSheet
+    
+    ' Tworzenie arkusza wynikowego
+    On Error Resume Next
+    Set wsOut = ThisWorkbook.Sheets("Wyniki")
+    If wsOut Is Nothing Then
+        Set wsOut = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+        wsOut.Name = "Wyniki"
+    Else
+        wsOut.Cells.Clear
+    End If
+    On Error GoTo 0
+    
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    ' Słowniki
+    Set sumaDict = CreateObject("Scripting.Dictionary")
+    Set countDict = CreateObject("Scripting.Dictionary")
+    Set naglowkiDict = CreateObject("Scripting.Dictionary") ' słownik dla nazwy -> słownik nagłówek->ilość
+    
+    naglowek = ""
+    
+    ' Iteracja po wierszach
+    For i = 1 To lastRow
+        If ws.Cells(i, 1).MergeCells Then
+            naglowek = ws.Cells(i, 1).MergeArea.Cells(1, 1).Value
+        Else
+            nazwa = Trim(ws.Cells(i, 1).Value)
+            If nazwa <> "" Then
+                Dim val As Double
+                If IsNumeric(ws.Cells(i, 2).Value) Then val = ws.Cells(i, 2).Value Else val = 0
+                
+                ' Suma i licznik
+                If Not sumaDict.exists(nazwa) Then
+                    sumaDict(nazwa) = 0
+                    countDict(nazwa) = 0
+                    Set naglowkiDict(nazwa) = CreateObject("Scripting.Dictionary")
+                End If
+                sumaDict(nazwa) = sumaDict(nazwa) + val
+                countDict(nazwa) = countDict(nazwa) + 1
+                
+                ' Zliczanie nagłówków
+                If naglowek <> "" Then
+                    If Not naglowkiDict(nazwa).exists(naglowek) Then
+                        naglowkiDict(nazwa)(naglowek) = 1
+                    Else
+                        naglowkiDict(nazwa)(naglowek) = naglowkiDict(nazwa)(naglowek) + 1
+                    End If
+                End If
+            End If
+        End If
+    Next i
+    
+    ' Wypisanie wyników
+    wsOut.Cells(1, 1).Value = "Nazwa"
+    wsOut.Cells(1, 2).Value = "Suma"
+    wsOut.Cells(1, 3).Value = "Ilość"
+    wsOut.Cells(1, 4).Value = "Nagłówki scalone (ilość)"
+    outRow = 2
+    
+    Dim key As Variant
+    For Each key In sumaDict.keys
+        wsOut.Cells(outRow, 1).Value = key
+        wsOut.Cells(outRow, 2).Value = sumaDict(key)
+        wsOut.Cells(outRow, 3).Value = countDict(key)
+        
+        ' Łączenie nagłówków z ilością wystąpień
+        Dim nagText As String, nag As Variant
+        nagText = ""
+        For Each nag In naglowkiDict(key).keys
+            If nagText <> "" Then nagText = nagText & ", "
+            nagText = nagText & nag & " (" & naglowkiDict(key)(nag) & ")"
+        Next nag
+        
+        wsOut.Cells(outRow, 4).Value = nagText
+        outRow = outRow + 1
+    Next key
+    
+    wsOut.Rows(1).Font.Bold = True
+    wsOut.Columns("A:D").AutoFit
+    
+    MsgBox "Tabela unikalnych nazw z sumą, ilością i liczbą wystąpień pod nagłówkami scalonymi została utworzona."
+End Sub
