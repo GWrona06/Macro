@@ -1,0 +1,50 @@
+'Poniżej masz gotowe makro VBA do Excela, które:
+'szuka nazw z Arkusz1 (kolumna 2)
+'w nazwach z Arkusz2 (kolumna 1) → jako część tekstu
+'jeśli znajdzie dopasowanie, przepisuje kod (kolumna 3 z Arkusz2)
+'do tego samego wiersza w Arkusz1 (np. do kolumny 3 – możesz zmienić)
+
+'Zakładam:
+'Arkusz1
+'kolumna B (2) → nazwa
+'kolumna C (3) → miejsce na kod
+'Arkusz2
+'kolumna A (1) → nazwa (dłuższy tekst)
+'kolumna C (3) → kod
+
+'🔹 Makro VBA (wyszukiwanie „nazwa w nazwie”)
+Sub SzukajINadpiszKody()
+
+    Dim ws1 As Worksheet, ws2 As Worksheet
+    Dim lastRow1 As Long, lastRow2 As Long
+    Dim i As Long, j As Long
+    Dim nazwa1 As String, nazwa2 As String
+
+    Set ws1 = Worksheets("Arkusz1")
+    Set ws2 = Worksheets("Arkusz2")
+
+    lastRow1 = ws1.Cells(ws1.Rows.Count, 2).End(xlUp).Row
+    lastRow2 = ws2.Cells(ws2.Rows.Count, 1).End(xlUp).Row
+
+    ' pętla po Arkusz1
+    For i = 2 To lastRow1
+        nazwa1 = Trim(ws1.Cells(i, 2).Value)
+
+        If nazwa1 <> "" Then
+            ' pętla po Arkusz2
+            For j = 2 To lastRow2
+                nazwa2 = ws2.Cells(j, 1).Value
+
+                ' sprawdzanie czy nazwa z Arkusz1
+                ' występuje w nazwie z Arkusz2
+                If InStr(1, nazwa2, nazwa1, vbTextCompare) > 0 Then
+                    ws1.Cells(i, 3).Value = ws2.Cells(j, 3).Value
+                    Exit For ' przerywa po pierwszym trafieniu
+                End If
+            Next j
+        End If
+    Next i
+
+    MsgBox "Zakończono przypisywanie kodów.", vbInformation
+
+End Sub
